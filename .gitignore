@@ -1,0 +1,16 @@
+﻿# Real database config (contains credentials)
+config/db.php
+
+# Dependencies
+vendor/
+node_modules/
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Logs and uploads
+*.log
+uploads/
