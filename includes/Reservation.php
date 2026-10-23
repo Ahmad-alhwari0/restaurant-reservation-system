@@ -94,4 +94,59 @@ class Reservation
 
         return $counts;
     }
+
+
+    public function getAll($search = '', $status = '')
+    {
+        $sql = "SELECT r.id, r.note, r.status, r.created_at,
+                   u.name, u.email,
+                   ts.slot_date, ts.start_time, ts.end_time
+            FROM reservations r
+            JOIN users u ON u.id = r.user_id
+            JOIN time_slots ts ON ts.id = r.slot_id
+            WHERE 1 = 1";
+
+        $params = [];
+
+        if ($search !== '') {
+            $sql .= " AND (u.name LIKE ? OR u.email LIKE ?)";
+            $params[] = '%' . $search . '%';
+            $params[] = '%' . $search . '%';
+        }
+        if ($status !== '') {
+            $sql .= " AND r.status = ?";
+            $params[] = $status;
+        }
+        $sql .= " ORDER BY ts.slot_date DESC, ts.start_time DESC";
+
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return $stmt->fetchAll();
+    }
+    public function updateStatus($reservationId, $newStatus)
+    {
+        $allowed = [
+            'pending'   => ['confirmed', 'rejected', 'cancelled'],
+            'confirmed' => ['cancelled'],
+        ];
+
+        $stmt = $this->pdo->prepare("SELECT status FROM reservations WHERE id = ?");
+        $stmt->execute([$reservationId]);
+        $reservation = $stmt->fetch();
+
+        if (!$reservation) {
+            return 'Reservation not found.';
+        }
+
+        $current = $reservation['status'];
+
+        if (!isset($allowed[$current]) || !in_array($newStatus, $allowed[$current])) {
+            return 'This status change is not allowed.';
+        }
+
+        $stmt = $this->pdo->prepare("UPDATE reservations SET status = ? WHERE id = ?");
+        $stmt->execute([$newStatus, $reservationId]);
+
+        return true;
+    }
 }
