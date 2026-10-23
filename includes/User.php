@@ -36,14 +36,26 @@ class User
         if (!$user || !password_verify($password, $user['password'])) {
             return 'Invalid email or password.';
         }
-        if($user['is_active']==0){
+        if ($user['is_active'] == 0) {
             return 'Your account has been disabled.';
         }
         return $user;
     }
 
-    public function countUsers(){
-        $stmt=$this->pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+    public function countUsers()
+    {
+        $stmt = $this->pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
         return (int) $stmt->fetchColumn();
+    }
+    public function getAll()
+    {
+        $stmt = $this->pdo->query("SELECT id, name, email, role, is_active, created_at FROM users ORDER BY created_at DESC");
+        return $stmt->fetchAll();
+    }
+    public function setActive($userId, $isActive)
+    {
+        $stmt = $this->pdo->prepare("UPDATE users SET is_active = ? WHERE id = ? AND role = 'user'");
+        $stmt->execute([$isActive ? 1 : 0, $userId]);
+        return $stmt->rowCount() > 0;
     }
 }
