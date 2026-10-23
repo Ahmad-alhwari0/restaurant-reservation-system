@@ -81,4 +81,17 @@ class Reservation
 
         return true;
     }
+
+
+    public function countByStatus()
+    {
+        $stmt = $this->pdo->query("SELECT status,COUNT(*) AS total FROM reservations GROUP BY status");
+        $counts = ['pending' => 0, 'confirmed' => 0, 'rejected' => 0, 'cancelled' => 0];
+
+        foreach ($stmt->fetchAll() as $row) {
+            $counts[$row['status']] = (int) $row['total'];
+        }
+
+        return $counts;
+    }
 }

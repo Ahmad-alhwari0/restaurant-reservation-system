@@ -41,4 +41,9 @@ class User
         }
         return $user;
     }
+
+    public function countUsers(){
+        $stmt=$this->pdo->query("SELECT COUNT(*) FROM users WHERE role = 'user'");
+        return (int) $stmt->fetchColumn();
+    }
 }
