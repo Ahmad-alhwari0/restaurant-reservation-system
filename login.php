@@ -1,6 +1,11 @@
 <?php
 require_once 'includes/init.php';
 
+if (Auth::isLoggedIn()) {
+    header('Location: index.php');
+    exit;
+}
+
 $error = '';
 $email = '';
 
